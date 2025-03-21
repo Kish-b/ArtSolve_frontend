@@ -2,34 +2,63 @@ document.addEventListener("DOMContentLoaded", () => {
     const canvas = document.getElementById("drawingCanvas");
     const ctx = canvas.getContext("2d");
     let drawing = false;
-    let history = []; // Store canvas states
+    let history = []; // Stores previous canvas states
 
-    // Set up drawing properties
     ctx.strokeStyle = "white";
     ctx.lineWidth = 5;
     ctx.lineCap = "round";
 
     // Save the current state before drawing
     function saveState() {
-        history.push(canvas.toDataURL()); // Save the canvas as an image
+        history.push(canvas.toDataURL()); // Save canvas as an image
+        if (history.length > 10) history.shift(); // Keep history manageable
     }
 
-    // Start drawing
-    canvas.addEventListener("mousedown", (e) => {
+    // Get coordinates for mouse or touch
+    function getCoordinates(event) {
+        if (event.touches) {
+            return {
+                x: event.touches[0].clientX - canvas.offsetLeft,
+                y: event.touches[0].clientY - canvas.offsetTop
+            };
+        }
+        return { x: event.offsetX, y: event.offsetY };
+    }
+
+    // Start drawing (Mouse & Touch)
+    function startDrawing(event) {
+        event.preventDefault();
         saveState();
         drawing = true;
+        const { x, y } = getCoordinates(event);
         ctx.beginPath();
-        ctx.moveTo(e.offsetX, e.offsetY);
-    });
+        ctx.moveTo(x, y);
+    }
 
-    canvas.addEventListener("mousemove", (e) => {
+    // Draw (Mouse & Touch)
+    function draw(event) {
         if (!drawing) return;
-        ctx.lineTo(e.offsetX, e.offsetY);
+        event.preventDefault();
+        const { x, y } = getCoordinates(event);
+        ctx.lineTo(x, y);
         ctx.stroke();
-    });
+    }
 
-    canvas.addEventListener("mouseup", () => drawing = false);
-    canvas.addEventListener("mouseout", () => drawing = false);
+    // Stop drawing
+    function stopDrawing() {
+        drawing = false;
+    }
+
+    // Add event listeners for both mouse and touch
+    canvas.addEventListener("mousedown", startDrawing);
+    canvas.addEventListener("mousemove", draw);
+    canvas.addEventListener("mouseup", stopDrawing);
+    canvas.addEventListener("mouseout", stopDrawing);
+
+    canvas.addEventListener("touchstart", startDrawing);
+    canvas.addEventListener("touchmove", draw);
+    canvas.addEventListener("touchend", stopDrawing);
+    canvas.addEventListener("touchcancel", stopDrawing);
 
     // Undo last action
     document.getElementById("undoButton").addEventListener("click", () => {
@@ -51,7 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("resultText").textContent = "No result yet";
     });
 
-    // Run analysis
+    // Run AI analysis
     document.getElementById("runButton").addEventListener("click", () => {
         canvas.toBlob(async (blob) => {
             if (!blob) return;
