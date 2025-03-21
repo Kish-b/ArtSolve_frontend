@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
             formData.append("file", blob, "drawing.png");
 
             try {
-                const response = await fetch("https://artsolve-backend.onrender.com", {
+                const response = await fetch("https://artsolve-backend.onrender.com/analayze/", {
                     method: "POST",
                     body: formData,
                     headers: { "Accept": "application/json" }
