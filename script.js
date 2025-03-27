@@ -247,7 +247,7 @@ document.addEventListener("DOMContentLoaded", () => {
             try {
                 resultText.textContent = "Processing...";
                 
-                const response = await fetch("http://127.0.0.1:8000/analyze/", {
+                const response = await fetch("https://artsolve-backend.onrender.com/analyze/", {
                     method: "POST",
                     body: formData,
                     headers: { "Accept": "application/json" }
